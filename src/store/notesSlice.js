@@ -18,7 +18,6 @@ const persistedState = loadState()
 const initialState = persistedState || {
   notes: [],
   currentNoteId: null,
-  currentView: 'editor', // 'editor' or 'history'
   draftContent: '',
 }
 
@@ -26,9 +25,6 @@ export const notesSlice = createSlice({
   name: 'notes',
   initialState,
   reducers: {
-    setCurrentView: (state, action) => {
-      state.currentView = action.payload
-    },
     setDraftContent: (state, action) => {
       state.draftContent = action.payload
     },
@@ -57,15 +53,13 @@ export const notesSlice = createSlice({
       const { noteId, content } = action.payload
       state.currentNoteId = noteId
       state.draftContent = content
-      state.currentView = 'editor'
     },
     createNewNote: (state) => {
       state.currentNoteId = null
       state.draftContent = ''
-      state.currentView = 'editor'
     }
   },
 })
 
-export const { setCurrentView, setDraftContent, saveNote, loadVersion, createNewNote } = notesSlice.actions
+export const { setDraftContent, saveNote, loadVersion, createNewNote } = notesSlice.actions
 export default notesSlice.reducer
