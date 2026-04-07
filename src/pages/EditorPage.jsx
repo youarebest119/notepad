@@ -66,11 +66,11 @@ const EditorPage = ({ theme }) => {
   }, [canvasSize])
 
   const colors = [
-    { name: 'Black', value: theme === 'light' ? '#000000' : '#ffffff' },
+    { name: 'Black', value: theme === 'light' ? '#000000' : '#ffffff', shortcut: 'L' },
     { name: 'Gray', value: '#666666' },
-    { name: 'Blue', value: '#2563eb' },
-    { name: 'Red', value: '#dc2626' },
-    { name: 'Green', value: '#16a34a' },
+    { name: 'Blue', value: '#2563eb', shortcut: 'B' },
+    { name: 'Red', value: '#dc2626', shortcut: 'R' },
+    { name: 'Green', value: '#16a34a', shortcut: 'H' },
     { name: 'Purple', value: '#9333ea' },
   ]
 
@@ -121,6 +121,41 @@ const EditorPage = ({ theme }) => {
     window.addEventListener('notepad-action', handleAction)
     return () => window.removeEventListener('notepad-action', handleAction)
   }, [currentNoteId, notes])
+
+  // Keyboard shortcuts for colors
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (e.altKey && e.shiftKey) {
+        const key = e.key.toLowerCase()
+        let colorToApply = null
+
+        switch (key) {
+          case 'r':
+            colorToApply = '#dc2626' // Red
+            break
+          case 'h':
+            colorToApply = '#16a34a' // Green
+            break
+          case 'b':
+            colorToApply = '#2563eb' // Blue
+            break
+          case 'l':
+            colorToApply = theme === 'light' ? '#000000' : '#ffffff' // Black/White
+            break
+          default:
+            break
+        }
+
+        if (colorToApply) {
+          e.preventDefault()
+          execAction('foreColor', colorToApply)
+        }
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    return () => window.removeEventListener('keydown', handleKeyDown)
+  }, [theme])
 
   return (
     <>

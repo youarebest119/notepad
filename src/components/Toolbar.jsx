@@ -69,7 +69,7 @@ const Toolbar = ({ activeTools, execAction, fontSize, handleFontSizeChange, canv
             className={`color-dot ${normalizeColor(activeTools.color) === c.value.toLowerCase() ? 'active' : ''}`} 
             style={{ background: c.value }} 
             onClick={() => execAction('foreColor', c.value)}
-            title={c.name}
+            title={c.shortcut ? `${c.name} (Alt+Shift+${c.shortcut})` : c.name}
           />
         ))}
       </div>
