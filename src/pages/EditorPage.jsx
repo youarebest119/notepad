@@ -2,6 +2,9 @@ import React, { useRef, useState, useEffect } from 'react'
 import { useSelector, useDispatch } from 'react-redux'
 import { setDraftContent, saveNote, createNewNote } from '../store/notesSlice'
 import Toolbar from '../components/Toolbar'
+import { encryptNote } from '../utils/cryptoUtils'
+import { saveNoteToGitHub } from '../utils/githubService'
+import toast from 'react-hot-toast'
 
 const EditorPage = ({ theme }) => {
   const dispatch = useDispatch()
@@ -25,6 +28,9 @@ const EditorPage = ({ theme }) => {
     color: '#000000',
   })
   const [showConfirmNew, setShowConfirmNew] = useState(false)
+  const [showOnlineSaveModal, setShowOnlineSaveModal] = useState(false)
+  const [pin, setPin] = useState('')
+  const [isSavingOnline, setIsSavingOnline] = useState(false)
 
   const execAction = (command, value = null) => {
     document.execCommand(command, false, value)
@@ -112,10 +118,45 @@ const EditorPage = ({ theme }) => {
     setShowSaveModal(false)
   }
 
+  const handleFileSaveOnline = () => {
+    const currentNote = notes.find(n => n.id === currentNoteId)
+    setNoteTitle(currentNote?.title || '')
+    setShowOnlineSaveModal(true)
+  }
+
+  const confirmSaveOnline = async () => {
+    if (!noteTitle.trim()) {
+      toast.error('Please enter a title')
+      return
+    }
+    if (!pin.trim()) {
+      toast.error('Please enter a PIN to encrypt your note')
+      return
+    }
+
+    setIsSavingOnline(true)
+    const encrypted = encryptNote(editorRef.current.innerHTML, pin)
+    
+    if (encrypted) {
+      const success = await saveNoteToGitHub(noteTitle, encrypted)
+      if (success) {
+        toast.success('Note saved online successfully!')
+        setShowOnlineSaveModal(false)
+        setPin('')
+      } else {
+        toast.error('Failed to save note online. Check your console and .env configuration.')
+      }
+    } else {
+      toast.error('Encryption failed.')
+    }
+    setIsSavingOnline(false)
+  }
+
   // Listen for global actions from Header
   useEffect(() => {
     const handleAction = (e) => {
       if (e.detail === 'save') handleFileSave()
+      if (e.detail === 'save-online') handleFileSaveOnline()
       if (e.detail === 'new') setShowConfirmNew(true)
     }
     window.addEventListener('notepad-action', handleAction)
@@ -213,6 +254,39 @@ const EditorPage = ({ theme }) => {
             <div className="modal-actions">
               <button className="btn btn-secondary" onClick={() => setShowConfirmNew(false)}>Cancel</button>
               <button className="btn btn-danger" onClick={handleFileNew}>Confirm</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showOnlineSaveModal && (
+        <div className="modal-overlay">
+          <div className="confirm-modal">
+            <h3>Save Note Online (Encrypted)</h3>
+            <p>Your note will be encrypted with your PIN and saved to GitHub.</p>
+            <div className="modal-form">
+              <label>Note Title</label>
+              <input 
+                type="text" 
+                className="modal-input" 
+                value={noteTitle} 
+                onChange={(e) => setNoteTitle(e.target.value)} 
+                placeholder="Enter title..."
+              />
+              <label>Encryption PIN</label>
+              <input 
+                type="password" 
+                className="modal-input" 
+                value={pin} 
+                onChange={(e) => setPin(e.target.value)} 
+                placeholder="Enter PIN..."
+              />
+            </div>
+            <div className="modal-actions">
+              <button className="btn btn-secondary" onClick={() => setShowOnlineSaveModal(false)} disabled={isSavingOnline}>Cancel</button>
+              <button className="btn btn-primary" onClick={confirmSaveOnline} disabled={isSavingOnline}>
+                {isSavingOnline ? 'Saving...' : 'Save Online'}
+              </button>
             </div>
           </div>
         </div>

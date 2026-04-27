@@ -5,6 +5,7 @@ import Header from './components/Header'
 // Lazy loading pages for optimization
 const EditorPage = lazy(() => import('./pages/EditorPage'))
 const NotesPage = lazy(() => import('./pages/NotesPage'))
+const OnlineNotesPage = lazy(() => import('./pages/OnlineNotesPage'))
 
 const Application = () => {
   const [theme, setTheme] = useState('light')
@@ -24,6 +25,7 @@ const Application = () => {
           <Routes>
             <Route path="/" element={<EditorPage theme={theme} />} />
             <Route path="/notes" element={<NotesPage />} />
+            <Route path="/online-notes" element={<OnlineNotesPage />} />
           </Routes>
         </Suspense>
       </main>

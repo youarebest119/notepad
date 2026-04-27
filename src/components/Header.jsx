@@ -9,7 +9,9 @@ const Header = ({ theme, toggleTheme }) => {
     File: [
       { label: 'New', to: '/', action: 'new' }, // Special case for new note
       { label: 'Save', action: 'save' },
+      { label: 'Save Online', action: 'save-online' },
       { label: 'Saved Notes', to: '/notes' },
+      { label: 'Online Notes', to: '/online-notes' },
     ],
     View: [
       { label: 'Toggle Dark Mode', action: toggleTheme },
