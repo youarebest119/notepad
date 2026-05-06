@@ -1,9 +1,21 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Link, useLocation } from 'react-router-dom'
 
 const Header = ({ theme, toggleTheme }) => {
   const [activeMenu, setActiveMenu] = useState(null)
+  const menuRef = useRef(null)
   const location = useLocation()
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (menuRef.current && !menuRef.current.contains(event.target)) {
+        setActiveMenu(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
 
   const menuItems = {
     File: [
@@ -22,7 +34,7 @@ const Header = ({ theme, toggleTheme }) => {
 
   return (
     <header className="notepad-header">
-      <div className="menu-bar">
+      <div className="menu-bar" ref={menuRef}>
         {Object.entries(menuItems).map(([key, items]) => (
           <div 
             key={key} 
